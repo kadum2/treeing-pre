@@ -1,132 +1,50 @@
 
+////setting up 
 
-    //map setup; 
+const map = L.map('map').setView([33.396600, 44.356579], 9); //leaflet basic map
 
-    //leaflet basic map
-    const map = L.map('map').setView([33.396600, 44.356579], 10);
+        ////////the required labels
+        let uncon = L.icon({
+            iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+            shadowSize: [50, 64], // size of the shadow
+            shadowAnchor: [4, 62], // the same for the shadow
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+        });
 
-    //////setting pathcards and circlecards options; need edit 
-    document.querySelector("#paths").addEventListener("click", () => {
-        document.querySelector("#circleCards").style.display = "none"
-        document.querySelector("#pathCards").style.display = "block"
-    })
-
-    document.querySelector("#endpoints").addEventListener("click", () => {
-        document.querySelector("#pathCards").style.display = "none"
-        document.querySelector("#circleCards").style.display = "block"
-    })
-
-    document.querySelector("#unconf").addEventListener("click", ()=>{
-        document.querySelector("#pathCards").style.display = "none"
-        document.querySelector("#circleCards").style.display = "none"
-
-        document.querySelector("#confPathCards").style.display = "block"
-        document.querySelector("#confCircleCards").style.display = "block"
-
-    })
-    document.querySelector("#conf").addEventListener("click", ()=>{
-        document.querySelector("#pathCards").style.display = "block"
-        document.querySelector("#circleCards").style.display = "block"
-
-        document.querySelector("#confPathCards").style.display = "none"
-        document.querySelector("#confCircleCards").style.display = "none"
-    })
-    
-
-
-    //////data storing;
-
-    ///linking list; may no need
-    let linkedRoutes = []
-    let linkedLabels = []
-    let linkedRoutes2 = []
-    let linkedLabels2 = []
-
-    let confirmedLinkedList = []
-    let unconfirmedLinkedList = []
-
-    /////data to send 
-    let confirmed = []
-    let deleted = []
-    let deletedIds = [] /// ids to delete from confirmed collection; need edit 
-
-    let currentObject
-
-
-    /////delete current object; 
-    let deleteCurrent = document.querySelector("#deleteCurrent")
-    deleteCurrent.addEventListener("click", (e) => {
-        console.log(linkedLabels)
-
-        if (linkedLabels.filter(i => {
-                i[0] == currentObject;
-                return i
-            }) || linkedRoutes.filter(i => {
-                i[0] == currentObject;
-                return i
-            })) {
-            let ret = clicking(currentObject, linkedLabels)
-            deleted.push(ret[0]._latlng)
-        } else if (linkedLabels2.filter(i => {
-                i[0] == currentObject;
-                return i
-            }) || linkedRoutes2.filter(i => {
-                i[0] == currentObject;
-                return i
-            })) {
-            let ret = clicking(currentObject, linkedLabels)
-            deletedIds.push(ret[2])
-        }
-    })
-
-
-    /////eventlistener functions 
-    function hovering(target, list) {
-
-        // console.log(target, list)
-        ////set the non selected colors
-        list.forEach(e => {
-            e[0].setStyle({
-                color: "#3261a8"
-            })
-            e[1].style.background = "#3261a8"
-        })
-        ///// get the intended array of the related doms 
-        let ret = list.filter(e => {
-            return e[0] == target || e[1] == target;
-        })
-        /////perform the change 
-        ret[0][0].setStyle({
-            color: "red"
-        })
-
-        // map.fitBounds(ret[0][0]._bounds);
-
-        // ret[0][0].getLatLng
-        // console.log(ret[0][0])
-
-        ret[0][1].style.background = "red"
-
-        return ret[0][0]
-    }
-
-    function clicking(target, list) {
-        //removing from ui 
-        let ret = list.filter(e => {
-            return e[0] == target || e[1] == target;
-        })
-
-        // console.log(ret)
-        map.removeLayer(ret[0][0])
-        ret[0][1].remove()
-        // console.log(ret[0][0]._latlngs)
-
-        return ret[0]
-    }
+        ////getting icon; icon is special object not just an image
+        let conFinished = L.icon({
+            iconUrl: "https://github.com/pointhi/leaflet-color-markers/blob/master/img/marker-icon-2x-red.png?raw=true",
+            shadowSize: [50, 64], // size of the shadow
+            shadowAnchor: [4, 62], // the same for the shadow
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+        });
+        let conUnfinished = L.icon({
+            iconUrl: "https://github.com/pointhi/leaflet-color-markers/blob/master/img/marker-icon-2x-red.png?raw=true",
+            shadowSize: [50, 64], // size of the shadow
+            shadowAnchor: [4, 62], // the same for the shadow
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+        });
 
 
 
-    window.onload = async () => {
+
+/////data containers and main elements 
+
+let currentCoords
+let currentId
+let message = document.querySelector("#message")
+let m
+
+
+
+
+/////getting data; fetch confirmed; finished, unifinished 
+////display data; red and green labels and imgs; based on the ????
+
+window.onload = async ()=>{
 
     //////get api key 
     let rApiKey = await fetch("/map-api-key")
@@ -142,216 +60,222 @@
 L.Control.geocoder().addTo(map);
 
 
+    //////get con-finished; use green pin, before imgs, after imgs 
 
-    //get data; unconfirmed paths, labels 
+    let confi= await fetch("/con-finished")
+    let pconfi= await confi.json()
+    // insertLocs()
 
-        let data = await fetch("/unconfirmed")
-        let unconfirmed = await data.json()
+    /////get con-unfinished; use red pin, current imgs
 
-        console.log("get unconfirmed; ", Object.values(unconfirmed))
+    let conun= await fetch("/con-unfinished")
+    let pconun = await conun.json()
+    // insertLocs()
 
-        Object.values(unconfirmed).forEach(e => {
 
-                console.log("will create routes", e.path[0])
+    /////get con-unfinished; use red pin, current imgs
 
-                ////create the object 
-                let theObject
-                if(typeof e.path[0]!="number"){
-                    theObject = L.polyline(e.path).addTo(map)
-                }else{
-                    theObject= L.circleMarker(e.path, {
-                        fillColor: '#3388FF',
-                        fillOpacity: 0.8,
-                        radius: 10
-                    }).addTo(map)    
+
+    //////uncon to insert buttons to add to list and that list of id to be confirmed
+    /////get uncon-unfinished 
+
+    let unun= await fetch("/uncon-unfinished")
+    let punun = await unun.json()
+    console.log(punun)
+    insertLocs(punun, true)
+
+    /////get uncon-finished 
+
+    let unfi= await fetch("/uncon-finished")
+    let punfi= await unfi.json()
+    // insertLocs()
+
+}
+
+
+/////insert data; make function to insert data 
+let linkedList = []
+let beforeImgsElements = []
+let afterImgsElements = []
+
+function insertLocs (dataList, mode){
+
+    ////make marker, insert in map, insert in linkedlist; make the label functionality 
+    ////make imgs, insert in containers (profile), insert in linkedlist
+    ////insert id in linked list 
+
+    dataList.forEach(e=>{
+        let m = L.marker(e.coords, {
+            icon: uncon
+        }).addTo(map);
+
+        m.addEventListener("click", (e)=>{
+            linkedList.forEach(ee=>{
+                if(ee.m == e.target){
+                    
+                    ////beforeImgs inserting; three imgs
+                    document.querySelector("#beforeImgs").innerHTML = ""
+                    for(let i = 0; i<3; i++){
+                        document.querySelector("#beforeImgs").append(ee.beforeImgsElements[i])
+                    }
+
+                    //////before contributers 
+                    ee.bSmType == "instagram"?ee.bSmType = "":ee.bSmType = ""
+
+                    document.querySelector("#bContributers").innerHTML = `
+                    <div class="contri">
+                        <h4 class="contributerName">${ee.bName}</h4>
+                        <img class="smType" style='background-image: url("../instagram-icon.jpg");    background-size: cover;
+                        background-position: center;
+                        height: 100%;
+                        width: 100%;
+                    '>
+                        <h4 class="contributerUserName">${ee.bUserName}</h4>
+                    </div>`
+
+                    /////after; 
+                    document.querySelector("#aContributers").innerHTML = `
+                    `
+
                 }
-
-
-                //create card
-                let card = document.createElement("div")
-                card.classList.add("card")
-                let addbtn = document.createElement("button")
-                addbtn.classList.add("addbtn")
-                addbtn.textContent = "confirm"
-                let dlbtn = document.createElement("button")
-                dlbtn.classList.add("dltbtn")
-                dlbtn.textContent = "delete"
-                card.append(addbtn, dlbtn)
-                document.querySelector("#pathCards").append(card)
-                //create linked list
-                unconfirmedLinkedList.push([theObject, card])
-                //add event listeners and their arguments
-
-                ///hovering method; 
-                card.addEventListener("mouseover", (e) => {
-                    // let ret = hovering(e.target, unconfirmedLinkedList)
-                    // map.fitBounds(ret._bounds);
-
-                                        // console.log("hovering confirmed")
-                                        let ret = hovering(e.target, unconfirmedLinkedList)
-
-                                        // console.log("theObject is; ", ret)
-                                        let bounds 
-                                        ret._bounds?bounds = ret._bounds:bounds=ret._latlng.toBounds(400)
-                                        // console.log(bounds)
-                                        map.fitBounds(bounds);
-                    
-                })
-                theObject.addEventListener("mouseover", (e) => {
-                    hovering(e.target, unconfirmedLinkedList)
-                })
-                theObject.addEventListener("click", (e) => {
-                    currentObject = e.target
-                })
-
-                ///clicking method; 
-                addbtn.addEventListener("click", (e) => {
-                    let ret = clicking(e.target.parentElement, unconfirmedLinkedList)
-                    // confirmed.push([ret[0]._latlng.lat, ret[0]._latlng.lng])
-
-                    ret[0]._latlng?confirmed.push([ret[0]._latlng.lat, ret[0]._latlng.lng]):confirmed.push(ret[0]._latlngs.map(ee=>[ee.lat, ee.lng]))
-                })
-                dlbtn.addEventListener("click", (e) => {
-                    let ret = clicking(e.target.parentElement, unconfirmedLinkedList)
-                    // console.log(ret[0]._latlngs.map(ee=>[ee.lat, ee.lng]))
-                    ret[0]._latlng?deleted.push([ret[0]._latlng.lat, ret[0]._latlng.lng]):deleted.push(ret[0]._latlngs.map(ee=>[ee.lat, ee.lng]))
-                    
-                })
+            })
         })
 
+        beforeImgsElements = []
+        e.beforeImgs.forEach(e=>{
+            let img = document.createElement("img")
+            img.style.backgroundImage = `url('../${e}')`
+            img.style.backgroundSize = "cover"
+            img.style.backgroundPosition = "center"
 
-
-
-
-
-
-
-
-        ////getting confirmed
-
-        let cdata = await fetch("/confirmed")
-        let pcdata = await cdata.json()
-
-        console.log("get confirmed", pcdata)
-
-        Object.values(pcdata).forEach(e => {
-
-
-                console.log("will create routes")
-                
-                //create the object 
-
-                let theObject
-
-                if(typeof e.path[0]!="number"){
-                    theObject = L.polyline(e.path).addTo(map)
-                }else{
-                    theObject = L.circleMarker(e.path, {
-                        fillColor: '#3388FF',
-                        fillOpacity: 0.8,
-                        radius: 10
-                    }).addTo(map)
-                }
-
-                //create card
-                let card = document.createElement("div")
-                card.classList.add("card")
-                let dlbtn = document.createElement("button")
-                dlbtn.classList.add("dltbtn")
-                dlbtn.textContent = "delete"
-                card.append(dlbtn)
-                document.querySelector("#confPathCards").append(card)
-
-
-                //create linked list
-                confirmedLinkedList.push([theObject, card, e._id])
-                //add event listeners and their arguments
-
-                ///hovering method; 
-                card.addEventListener("mouseover", (e) => {
-                    // console.log("hovering confirmed")
-                    let ret = hovering(e.target, confirmedLinkedList)
-                    let bounds 
-                    ret._bounds?bounds = ret._bounds:bounds=ret._latlng.toBounds(400)
-                    map.fitBounds(bounds);
-                })
-
-
-                theObject.addEventListener("mouseover", (e) => {
-                    hovering(e.target, confirmedLinkedList)
-                })
-                theObject.addEventListener("click", (e) => {
-                    currentObject = e.target
-                })
-
-                dlbtn.addEventListener("click", (e) => {
-
-                    let ret = clicking(e.target.parentElement, confirmedLinkedList)
-                    deletedIds.push(ret[2])
-                })
+            beforeImgsElements.push(img)
+            
         })
-    }
 
+        if(e.afterImgs[0]){
+            afterImgsElements = []
 
+            for(let i = 0; i<4; i++){
 
-    ////sending data 
-    let send = document.querySelector("#send")
-    send.addEventListener("click", async () => {
-
-        console.log("confirmed",!confirmed[0], "deleted", !deleted[0], "deletedIDs", !deletedIds[0])
-
-        //// confirmed labels; 
-        if(confirmed[0]){
-            console.log("will send confiremd; ",confirmed)
-
-            await fetch("/confirmed", {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(confirmed)
-            })
-            confirmed = []
-        }else{
-            console.log("will not send confirmed; ", Boolean(confirmed[0]))
+                let img = document.createElement("img")
+                img.style.backgroundImage = `url('../${e.afterImgs[i]}')`
+                img.style.backgroundSize = "cover"
+                img.style.backgroundPosition = "center"
+                afterImgsElements.push(img)
+            }
         }
 
-        //////deleted 
-        if(deleted[0]){
-            await fetch("/deleted", {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(deleted)
-            })
-            deleted = []
-        }else{
-            console.log("will not send deleted; ", Boolean(deleted[0]))
-        }
-
-        ////deleted ids 
-        if(deletedIds[0]){
-            await fetch("/editconfirmed", {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(deletedIds)
-            })
-            deletedIds = []
-        }else{
-            console.log("will not send deletedID; ", Boolean(deletedIds[0]))
-        }
+        linkedList.push({m:m, beforeImgsElements: beforeImgsElements, id: e.id, afterImgsElements: afterImgsElements, bName: e.bName, bUserName: e.bUserName, aNames: e.aNames, aUserNames: e.aUserNames})
     })
 
+    if(mode){ ///insert buttons 
+        console.log("adding buttons")
 
-
-    /////test code; 
-
-    window.onclick = () => {
-        console.log("confirmed routes", confirmed)
-        console.log("deleted routes", deleted)
-        // console.log("confirmed labels", confirmedLabels)
     }
+
+}
+
+
+
+/////adding loc
+
+document.querySelectorAll(".addCoords").forEach(e=>{
+e.onclick = () => {
+    document.querySelector(".addCoords").classList.toggle("red")
+}})
+
+map.addEventListener('click', function (ev) {
+    m?map.removeLayer(m):null
+    if (addUnconUnfinishedCoords.classList.contains("red")) {
+        let latlng = map.mouseEventToLatLng(ev.originalEvent);
+        let i = [latlng.lat, latlng.lng]
+        m = L.marker(i, {
+            icon: uncon
+        }).addTo(map);
+
+        currentCoords = i
+    }
+});
+
+
+////send data 
+
+document.querySelectorAll(".send").forEach(ee=>{
+
+ee.onclick= async (e)=>{
+    console.log(currentCoords)
+    console.log(e.target.parentElement.children)
+
+    //////check if exist then empty them 
+
+    let children = e.target.parentElement.children
+
+    let aChildren = [...children]
+    aChildren.forEach(e=>console.log(e))
+
+
+
+    if((currentCoords || currentId) && children[3].files[0] && children[3].files[1] && children[3].files[2]){
+
+        message.innerHTML = ""
+        // console.log(children[3].files)
+        let fd = new FormData()
+
+        /////coords 
+        e.target.getAttribute("id") == "sendUnfinished" || e.target.getAttribute("id") == "sendFinished"?fd.append("coords", currentCoords):fd.append("coords", currentId)
+
+        /////imgs 
+        if(aChildren.find(e=>e.getAttribute("class") == "addBImgs")){
+            console.log("found b img", aChildren.find(e=>e.getAttribute("class") == "addBImgs").files)
+            for (let i of aChildren.find(e=>e.getAttribute("class") == "addBImgs").files) {
+                fd.append(`bImgs`, i);
+            }
+            }
+        if(aChildren.find(e=>e.getAttribute("class") == "addAImgs")){
+            console.log("found a img", aChildren.find(e=>e.getAttribute("class") == "addAImgs").files)
+            for (let i of aChildren.find(e=>e.getAttribute("class") == "addAImgs").files) {
+                fd.append(`aImgs`, i);
+            }
+            }
+
+        /////names 
+        fd.append("names", aChildren.find(e=>e.getAttribute("class") == "names").value)
+
+        console.log(fd)
+
+
+        ///send 
+        if(e.target.getAttribute("id")=="sendUnfinished"){
+            await fetch("/con-unfinished", {
+                method: "POST", 
+                body: fd
+            })
+        }else if(e.target.getAttribute("id")=="sendFinished"){
+            await fetch("/con-finished", {
+                method: "POST", 
+                body: fd
+            })
+        }else if (e.target.getAttribute("id")=="sendFinishing"){
+            await fetch("/con-finishing", {
+                method: "POST", 
+                body: fd
+            })
+        }
+
+        ////empty 
+        aChildren.find(e=>e.getAttribute("class") == "names").value = ""
+        if(aChildren.find(e=>e.getAttribute("class") == "addAImgs")){aChildren.find(e=>e.getAttribute("class") == "addAImgs").files = null}
+        if(aChildren.find(e=>e.getAttribute("class") == "addBImgs")){aChildren.find(e=>e.getAttribute("class") == "addBImgs").files = null}
+        
+
+        map.removeLayer(m)
+        currentCoords = ""
+    }else{
+        message.innerHTML = "fill the rest input"
+    }
+}
+})
+
+
+
 
