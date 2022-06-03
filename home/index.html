@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>coaster-route; home</title>
+
+    <!-- leaflet cdn -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+        integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+        crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+
+    <!-- searh box -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-search/3.0.2/leaflet-search.src.js"
+        integrity="sha512-V+GL/y/SDxveIQvxnw71JKEPqV2N+RYrUlf6os3Ru31Yhnv2giUsPadRuFtgmIipiXFBc+nCGMHPUJQc6uxxOA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+    <header class="green">
+        <div class="logo ">
+            <div class="black"></div>
+            <div class="red"></div>
+            <div class="white"></div>
+            <!-- <div class="green"></div> -->
+        </div>
+
+    </header>
+    <div class="step h"></div>
+    <div class="body ">
+
+
+        <div id="map"></div>
+        <div class="btns">
+            <button id="add-mode">اضافة مسار</button>
+            <div class="deletebtns">
+                <button id="cancel-step">الغاء الخطوة</button>
+                <button id="cancel-route">الغاء المسار</button>
+                <!-- <button id="cancel-all">الغاء الجميع</button> -->
+            </div>
+            <button id="add-circle">تحديد كبداية او نهاية</button>
+            <button id="send"> ارسال</button>
+        </div>
+
+        <!-- main script  -->
+        <script src="./script.js"></script>
+
+
+
+
+
+    </div>
+
+    <div class="step f"></div>
+
+    <footer>
+
+        <div id="desc">مشروع يمكن المستخدم من رسم مسارات النقل العام لعرضها بعد
+            ان يتم توثيقها
+        </div>
+
+        <a href="https://github.com/kadum2/coaster-route-polyline-method">github repo</a>
+
+    </footer>
+
+
+</body>
+
+</html>
